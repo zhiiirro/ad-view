@@ -4,72 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Просмотр рекламы</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        h1 {
-            margin-bottom: 20px;
-        }
-        .confirm-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            color: white;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .confirm-button:hover {
-            background-color: #45a049;
-        }
-    </style>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-962-867-4955"
+            crossorigin="anonymous"></script>
+    <script src="script.js"></script>
 </head>
 <body>
-    <h1>Просмотрите рекламу, чтобы получить награду</h1>
+    <h1>Пожалуйста, посмотрите рекламу</h1>
+    <button id="showAdButton">Показать рекламу</button>
+
     <script>
-        // Загружаем полноэкранные объявления
-        let interstitialAd;
-        (adsbygoogle = window.adsbygoogle || []).push({
-            google_ad_client: "ca-app-pub-8980345378738824~3936348379",
-            enable_page_level_ads: true
-        });
+        let adUnitId = 'ca-app-pub-8980345378738824/3076065999'; // Замени на Ad Unit ID из AdMob
+        let isAdLoaded = false;
 
-        function loadInterstitialAd() {
-            interstitialAd = new google.ads.InterstitialAds();
-            interstitialAd.setAdUnitId("ca-app-pub-8980345378738824/6867169019");
-            interstitialAd.loadAd();
-        }
-
-        function showInterstitialAd() {
-            if (interstitialAd && interstitialAd.isLoaded()) {
-                interstitialAd.showAd();
-            } else {
-                alert("Объявление еще не загружено.");
+        // Инициализация рекламы
+        function initAd() {
+            if (!admob) {
+                console.log('AdMob не загружен');
+                return;
             }
+
+            admob.rewarded.load({
+                adUnitId: adUnitId,
+            }).then(() => {
+                isAdLoaded = true;
+                console.log('Реклама загружена');
+            }).catch((err) => {
+                console.log('Ошибка загрузки рекламы:', err);
+            });
         }
 
-        function confirmAdView() {
-            window.location.href = "tg://resolve?domain=@testmyreferralbot&start=confirm_ad";
-        }
-
-        // Загружаем объявление при загрузке страницы
-        window.onload = loadInterstitialAd;
-
-        // Показываем объявление и подтверждаем просмотр
-        document.addEventListener("DOMContentLoaded", () => {
-            showInterstitialAd();
-            setTimeout(confirmAdView, 10000); // Ожидаем 10 секунд перед подтверждением просмотра
+        // Показать рекламу
+        document.getElementById('showAdButton').addEventListener('click', () => {
+            if (isAdLoaded) {
+                admob.rewarded.show().then(() => {
+                    console.log('Реклама показана');
+                }).catch((err) => {
+                    console.log('Ошибка показа рекламы:', err);
+                });
+            } else {
+                console.log('Реклама еще не загружена');
+            }
         });
+
+        // Обработка завершения просмотра рекламы
+        admob.rewarded.on('reward', (reward) => {
+            console.log('Пользователь получил награду:', reward);
+            // Перенаправляем пользователя обратно в бота с наградой
+            window.location.href = `https://t.me/ТВОЙ_БОТ?start=reward`;
+        });
+
+        // Инициализация при загрузке страницы
+        window.onload = initAd;
     </script>
 </body>
 </html>
